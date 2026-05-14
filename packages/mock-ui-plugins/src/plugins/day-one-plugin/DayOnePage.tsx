@@ -13,6 +13,7 @@ import {
 } from "@patternfly/react-core";
 
 const InitialSetupForm = lazy(() => import("./InitialSetupForm"));
+const WelcomePage = lazy(() => import("./WelcomePage"));
 
 interface ComponentCard {
   title: string;
@@ -32,6 +33,18 @@ const components: ComponentCard[] = [
     element: (
       <Suspense>
         <InitialSetupForm />
+      </Suspense>
+    ),
+  },
+  {
+    title: "Welcome",
+    slug: "welcome",
+    description:
+      "Post-setup welcome screen: workload selection and first cluster creation.",
+    status: "in-progress",
+    element: (
+      <Suspense>
+        <WelcomePage />
       </Suspense>
     ),
   },
