@@ -7,15 +7,16 @@
     "build": "webpack"
   },
   "dependencies": {
-    "clsx": "^2.1.1",
     "@fleetshift/common": "*",
     "@patternfly/react-charts": "^8.4.1",
     "@patternfly/react-component-groups": "^6.4.0",
     "@patternfly/react-core": "^6.4.1",
+    "@patternfly/react-data-view": "^6.4.0",
     "@patternfly/react-icons": "^6.4.0",
     "@patternfly/react-table": "^6.4.1",
     "@scalprum/core": "^0.9.0",
     "@scalprum/react-core": "^0.11.1",
+    "clsx": "^2.1.1",
     "immutable": "^5.1.5",
     "lodash": "^4.17.23",
     "react": "^18.3.1",

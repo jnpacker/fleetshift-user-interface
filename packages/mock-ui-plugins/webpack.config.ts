@@ -123,6 +123,30 @@ const DayOnePlugin = new DynamicRemotePlugin({
   },
 });
 
+const CorePlugin = new DynamicRemotePlugin({
+  extensions: [
+    {
+      type: "fleetshift.module",
+      properties: {
+        label: "Core Plugin",
+        component: { $codeRef: "CorePluginPage.default" },
+      },
+    },
+  ],
+  sharedModules,
+  entryScriptFilename: "plugins/core/core-plugin.[contenthash].js",
+  pluginManifestFilename: "plugins/core/core-plugin-manifest.json",
+  // @ts-ignore
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "core-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      CorePluginPage: p("./src/plugins/core-plugin/CorePluginPage.tsx"),
+    },
+  },
+});
+
 const RoutingPlugin = new DynamicRemotePlugin({
   extensions: [],
   sharedModules,
@@ -158,6 +182,7 @@ const config: Configuration = {
   plugins: [
     ManagementPlugin,
     DayOnePlugin,
+    CorePlugin,
     RoutingPlugin,
     new PluginRegistryPlugin({
       assetsHost: "",
@@ -172,6 +197,12 @@ const config: Configuration = {
           name: "day-one-plugin",
           key: "day-one",
           label: "Day One",
+          persona: "ops",
+        },
+        {
+          name: "core-plugin",
+          key: "core",
+          label: "Core Plugin",
           persona: "ops",
         },
         {
