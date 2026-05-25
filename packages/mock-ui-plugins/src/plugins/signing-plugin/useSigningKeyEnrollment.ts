@@ -16,6 +16,8 @@ import {
 } from "./enrollmentUtils";
 import type { RegistryType } from "./enrollmentUtils";
 
+const POLL_LIMIT = 6; // Number of times to poll for GitHub key before showing error (total wait time is POLL_LIMIT * 1.5 minutes)
+
 export type EnrollStep =
   | "loading"
   | "generating"
@@ -31,6 +33,9 @@ function useGitHubKeyPolling(
   enabled: boolean,
 ) {
   const [found, setFound] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  const clearPollingError = useCallback(() => setError(undefined), [setError]);
 
   useEffect(() => {
     setFound(false);
@@ -40,12 +45,24 @@ function useGitHubKeyPolling(
     if (!enabled || !username || !sshPublicKey || found) return;
     const pollIncrement = 1000; // 1 second
     let pollInterval = pollIncrement; // increase if not found to avoid hitting GitHub rate limits
+    let pollingAttempts = 0;
 
     const keyData = sshPublicKey.split(" ")[1];
 
     let timer: ReturnType<typeof setTimeout>;
     let cancelled = false;
     const poll = async () => {
+      if (pollingAttempts >= POLL_LIMIT) {
+        console.error("GitHub key polling exceeded maximum attempts");
+        setFound(false);
+        clearTimeout(timer);
+        setError(
+          "Unable to verify GitHub signing key. Please ensure the signing key is added to GitHub and try again.",
+        );
+        return;
+      }
+      pollInterval += pollIncrement;
+      pollingAttempts += 1;
       try {
         const res = await fetch(
           `/api/ui/github-signing-keys/${encodeURIComponent(username)}`,
@@ -60,6 +77,18 @@ function useGitHubKeyPolling(
         }
       } catch {
         pollInterval += pollIncrement;
+        // less attempts for errors since these are more likely to be transient network issues rather than hitting GitHub rate limits or missing keys
+        if (pollingAttempts >= POLL_LIMIT / 2) {
+          console.error(
+            `GitHub key API is not responding. Attempt ${pollingAttempts}. Error: ${error}`,
+          );
+
+          setError(
+            "Unable to verify GitHub signing key due to network issues. Please check your connection and try again.",
+          );
+          clearTimeout(timer);
+          return;
+        }
       }
       if (!cancelled) {
         timer = setTimeout(poll, pollInterval);
@@ -69,10 +98,11 @@ function useGitHubKeyPolling(
     return () => {
       cancelled = true;
       clearTimeout(timer);
+      pollingAttempts = 0;
     };
   }, [enabled, username, sshPublicKey, found]);
 
-  return found;
+  return { found, error, clearPollingError };
 }
 
 export function useSigningKeyEnrollment() {
@@ -92,14 +122,31 @@ export function useSigningKeyEnrollment() {
         | undefined) ?? null)
     : null;
 
-  const keyFound = useGitHubKeyPolling(
+  const {
+    found: keyFound,
+    error: ghKeyError,
+    clearPollingError,
+  } = useGitHubKeyPolling(
     githubUsername,
     sshPublicKey,
     ghPollEnabled && step === "register-key" && registry === "github",
   );
 
+  useEffect(() => {
+    if (keyFound || ghPollEnabled) {
+      clearPollingError();
+    }
+  }, [keyFound, ghPollEnabled]);
+
+  useEffect(() => {
+    if (ghKeyError) {
+      setGhPollEnabled(false);
+    }
+  }, [keyFound, ghKeyError]);
+
   const initialize = useCallback(async () => {
     try {
+      clearPollingError();
       const method = await getAuthMethod("default");
       setAuthMethod(method);
       const reg = detectRegistry(method);
@@ -246,6 +293,8 @@ export function useSigningKeyEnrollment() {
     enrollmentName,
     githubUsername,
     isSetupFlow,
+    ghPollEnabled,
+    ghKeyError,
     enrollOidc,
     retry,
     handleReenroll,

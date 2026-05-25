@@ -43,6 +43,8 @@ const SigningKeyEnrollment = () => {
     enrollmentName,
     githubUsername,
     isSetupFlow,
+    ghPollEnabled,
+    ghKeyError,
     enrollOidc,
     retry,
     handleReenroll,
@@ -163,6 +165,8 @@ const SigningKeyEnrollment = () => {
               <GHEnroll
                 githubUsername={githubUsername}
                 setGhPollEnabled={setGhPollEnabled}
+                ghPollEnabled={ghPollEnabled}
+                ghKeyError={ghKeyError}
               />
             )}
 
