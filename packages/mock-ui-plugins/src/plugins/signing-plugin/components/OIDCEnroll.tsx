@@ -5,9 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@patternfly/react-core";
+import { EnrollStep } from "../enrollmentReducer";
 
 export type OIDCEnrollProps = {
-  step: string;
+  step: EnrollStep;
   enrollOidc: () => void;
 };
 
@@ -24,8 +25,8 @@ const OIDCEnroll = ({ step, enrollOidc }: OIDCEnrollProps) => {
         </p>
         <Button
           variant="primary"
-          isLoading={step === "enrolling"}
-          isDisabled={step === "enrolling"}
+          isLoading={step === EnrollStep.Enrolling}
+          isDisabled={step === EnrollStep.Enrolling}
           onClick={enrollOidc}
           className="pf-v6-u-mt-sm"
         >

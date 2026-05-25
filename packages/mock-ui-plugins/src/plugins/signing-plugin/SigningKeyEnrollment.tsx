@@ -13,7 +13,7 @@ import {
 import { KeyIcon } from "@patternfly/react-icons";
 import { AnimatePresence, motion } from "motion/react";
 import { Link } from "react-router-dom";
-import { useSigningKeyEnrollment } from "./useSigningKeyEnrollment";
+import { EnrollStep, useSigningKeyEnrollment } from "./useSigningKeyEnrollment";
 import "./SetupPage.scss";
 import AnimatedHeight from "./components/AnimatedHeight";
 import EnrollmentDL from "./components/EnrollmentDL";
@@ -51,7 +51,11 @@ const SigningKeyEnrollment = () => {
     setGhPollEnabled,
   } = useSigningKeyEnrollment();
 
-  if (step === "loading" || step === "generating" || step === "verifying") {
+  if (
+    step === EnrollStep.Loading ||
+    step === EnrollStep.Generating ||
+    step === EnrollStep.Verifying
+  ) {
     return (
       <div className="fs-setup">
         <Title headingLevel="h1" className="fs-setup__title">
@@ -63,7 +67,7 @@ const SigningKeyEnrollment = () => {
     );
   }
 
-  if (step === "error") {
+  if (step === EnrollStep.Error) {
     return <EnrollmentError error={error} onRetry={retry} />;
   }
 
@@ -74,7 +78,7 @@ const SigningKeyEnrollment = () => {
       </Title>
 
       <AnimatePresence mode="popLayout">
-        {step === "enrolled" ? (
+        {step === EnrollStep.Enrolled ? (
           <motion.div
             key="enrolled"
             initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}

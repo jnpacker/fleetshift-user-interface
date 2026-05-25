@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useAuth as useOidcAuth } from "react-oidc-context";
 import {
   generateSigningKey,
@@ -8,24 +8,20 @@ import {
   removeSigningKey,
 } from "./signingKeyApi";
 import { createSignerEnrollment, getAuthMethod } from "./api";
-import type { AuthMethod } from "./api";
 import {
   detectRegistry,
   refreshAndGetIdToken,
   testSign,
 } from "./enrollmentUtils";
-import type { RegistryType } from "./enrollmentUtils";
+import {
+  Action,
+  EnrollStep,
+  enrollmentReducer,
+  initialState,
+} from "./enrollmentReducer";
+export { EnrollStep } from "./enrollmentReducer";
 
-const POLL_LIMIT = 6; // Number of times to poll for GitHub key before showing error (total wait time is POLL_LIMIT * 1.5 minutes)
-
-export type EnrollStep =
-  | "loading"
-  | "generating"
-  | "register-key"
-  | "enrolling"
-  | "verifying"
-  | "enrolled"
-  | "error";
+const POLL_LIMIT = 6;
 
 function useGitHubKeyPolling(
   username: string | null,
@@ -43,8 +39,8 @@ function useGitHubKeyPolling(
 
   useEffect(() => {
     if (!enabled || !username || !sshPublicKey || found) return;
-    const pollIncrement = 1000; // 1 second
-    let pollInterval = pollIncrement; // increase if not found to avoid hitting GitHub rate limits
+    const pollIncrement = 1000;
+    let pollInterval = pollIncrement;
     let pollingAttempts = 0;
 
     const keyData = sshPublicKey.split(" ")[1];
@@ -77,12 +73,10 @@ function useGitHubKeyPolling(
         }
       } catch {
         pollInterval += pollIncrement;
-        // less attempts for errors since these are more likely to be transient network issues rather than hitting GitHub rate limits or missing keys
         if (pollingAttempts >= POLL_LIMIT / 2) {
           console.error(
-            `GitHub key API is not responding. Attempt ${pollingAttempts}. Error: ${error}`,
+            `GitHub key API is not responding. Attempt ${pollingAttempts}.`,
           );
-
           setError(
             "Unable to verify GitHub signing key due to network issues. Please check your connection and try again.",
           );
@@ -105,18 +99,14 @@ function useGitHubKeyPolling(
   return { found, error, clearPollingError };
 }
 
+// --- Main hook ---
+
 export function useSigningKeyEnrollment() {
   const auth = useOidcAuth();
-  const [step, setStep] = useState<EnrollStep>("loading");
-  const [sshPublicKey, setSshPublicKey] = useState<string | null>(null);
-  const [registry, setRegistry] = useState<RegistryType>("oidc");
-  const [authMethod, setAuthMethod] = useState<AuthMethod | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [enrollmentName, setEnrollmentName] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(enrollmentReducer, initialState);
   const initialized = useRef(false);
-  const [ghPollEnabled, setGhPollEnabled] = useState(false);
 
-  const githubUsername = authMethod?.oidcConfig?.registrySubjectMapping
+  const githubUsername = state.authMethod?.oidcConfig?.registrySubjectMapping
     ? (((auth.user?.profile as Record<string, unknown>)?.github_username as
         | string
         | undefined) ?? null)
@@ -128,19 +118,21 @@ export function useSigningKeyEnrollment() {
     clearPollingError,
   } = useGitHubKeyPolling(
     githubUsername,
-    sshPublicKey,
-    ghPollEnabled && step === "register-key" && registry === "github",
+    state.sshPublicKey,
+    state.ghPollEnabled &&
+      state.step === EnrollStep.RegisterKey &&
+      state.registry === "github",
   );
 
   useEffect(() => {
-    if (keyFound || ghPollEnabled) {
+    if (keyFound || state.ghPollEnabled) {
       clearPollingError();
     }
-  }, [keyFound, ghPollEnabled]);
+  }, [keyFound, state.ghPollEnabled]);
 
   useEffect(() => {
     if (ghKeyError) {
-      setGhPollEnabled(false);
+      dispatch({ type: Action.SetGhPoll, enabled: false });
     }
   }, [keyFound, ghKeyError]);
 
@@ -148,25 +140,27 @@ export function useSigningKeyEnrollment() {
     try {
       clearPollingError();
       const method = await getAuthMethod("default");
-      setAuthMethod(method);
       const reg = detectRegistry(method);
-      setRegistry(reg);
+      dispatch({ type: Action.InitAuth, authMethod: method, registry: reg });
 
       const status = await getSigningKeyStatus();
       if (status.enrolled && status.sshPublicKey) {
-        setSshPublicKey(status.sshPublicKey);
-        setStep("register-key");
+        dispatch({
+          type: Action.ExistingKey,
+          sshPublicKey: status.sshPublicKey,
+        });
       } else {
-        setStep("generating");
+        dispatch({ type: Action.Generating });
         const key = await generateSigningKey();
-        setSshPublicKey(key);
-        setStep("register-key");
+        dispatch({ type: Action.KeyGenerated, sshPublicKey: key });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Initialization failed");
-      setStep("error");
+      dispatch({
+        type: Action.Error,
+        error: err instanceof Error ? err.message : "Initialization failed",
+      });
     }
-  }, []);
+  }, [clearPollingError]);
 
   useEffect(() => {
     if (initialized.current) return;
@@ -175,7 +169,7 @@ export function useSigningKeyEnrollment() {
   }, [initialize]);
 
   const enrollOidc = useCallback(async () => {
-    setStep("enrolling");
+    dispatch({ type: Action.EnrollStart });
     try {
       const pub = await getStoredPublicKey();
       if (!pub) throw new Error("No signing key in IndexedDB");
@@ -224,19 +218,23 @@ export function useSigningKeyEnrollment() {
         signerEnrollmentId: `browser-${Date.now()}`,
         identityToken: freshIdToken,
       });
-      setEnrollmentName(enrollment.name);
+      dispatch({
+        type: Action.EnrollSuccess,
+        enrollmentName: enrollment.name,
+      });
 
-      setStep("verifying");
       await testSign(freshIdToken);
-      setStep("enrolled");
+      dispatch({ type: Action.VerifySuccess });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Enrollment failed");
-      setStep("error");
+      dispatch({
+        type: Action.Error,
+        error: err instanceof Error ? err.message : "Enrollment failed",
+      });
     }
   }, [auth]);
 
   const enrollGithub = useCallback(async () => {
-    setStep("enrolling");
+    dispatch({ type: Action.EnrollStart });
     try {
       const idToken = auth.user?.id_token;
       if (!idToken) throw new Error("No ID token — log in first");
@@ -246,54 +244,62 @@ export function useSigningKeyEnrollment() {
         identityToken: idToken,
         registryId: "github.com",
       });
-      setEnrollmentName(enrollment.name);
+      dispatch({
+        type: Action.EnrollSuccess,
+        enrollmentName: enrollment.name,
+      });
 
-      setStep("verifying");
       const currentIdToken = auth.user?.id_token;
       if (!currentIdToken) throw new Error("No ID token for test sign");
       await testSign(currentIdToken);
-      setStep("enrolled");
+      dispatch({ type: Action.VerifySuccess });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Enrollment failed");
-      setStep("error");
+      dispatch({
+        type: Action.Error,
+        error: err instanceof Error ? err.message : "Enrollment failed",
+      });
     }
   }, [auth]);
 
   const handleReenroll = useCallback(async () => {
     await removeSigningKey();
-    setSshPublicKey(null);
-    setEnrollmentName(null);
-    setStep("loading");
+    dispatch({ type: Action.ReEnroll });
     await initialize();
   }, [initialize]);
 
   const retry = useCallback(async () => {
-    setError(null);
-    if (sshPublicKey) {
-      setStep("register-key");
-    } else {
-      setStep("loading");
+    dispatch({ type: Action.Retry });
+    if (!state.sshPublicKey) {
       await initialize();
     }
-  }, [sshPublicKey, initialize]);
+  }, [state.sshPublicKey, initialize]);
 
   const isSetupFlow = window.location.pathname.startsWith("/setup");
 
   useEffect(() => {
-    if (keyFound && step === "register-key" && registry === "github") {
+    if (
+      keyFound &&
+      state.step === "register-key" &&
+      state.registry === "github"
+    ) {
       enrollGithub();
     }
-  }, [keyFound, step, registry, enrollGithub]);
+  }, [keyFound, state.step, state.registry, enrollGithub]);
+
+  const setGhPollEnabled = useCallback(
+    (enabled: boolean) => dispatch({ type: Action.SetGhPoll, enabled }),
+    [],
+  );
 
   return {
-    step,
-    sshPublicKey,
-    registry,
-    error,
-    enrollmentName,
+    step: state.step,
+    sshPublicKey: state.sshPublicKey,
+    registry: state.registry,
+    error: state.error,
+    enrollmentName: state.enrollmentName,
     githubUsername,
     isSetupFlow,
-    ghPollEnabled,
+    ghPollEnabled: state.ghPollEnabled,
     ghKeyError,
     enrollOidc,
     retry,
