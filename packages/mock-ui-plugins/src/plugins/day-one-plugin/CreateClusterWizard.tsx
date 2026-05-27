@@ -10,7 +10,10 @@ import {
   Wizard,
   WizardStep,
 } from "@patternfly/react-core";
-import { buildSignedInputEnvelope, usePluginNavigate } from "@fleetshift/common";
+import {
+  buildSignedInputEnvelope,
+  usePluginNavigate,
+} from "@fleetshift/common";
 import { getModule } from "@scalprum/core";
 import { createDeployment } from "../management-plugin/api";
 import ClusterDetailsStep from "./ClusterDetailsStep";
@@ -51,7 +54,7 @@ interface CreateClusterWizardProps {
 
 export default function CreateClusterWizard({
   onSetupNext,
-  onSetupSkip,
+  onSetupSkip: _onSetupSkip,
 }: CreateClusterWizardProps) {
   const navigate = useNavigate();
   const clusters = usePluginNavigate("core-plugin", "ClustersModule");

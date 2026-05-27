@@ -399,13 +399,13 @@ export default function ClustersPage() {
               <Button
                 variant="primary"
                 component={(props) => (
-                      <PluginLink
-                        {...props}
-                        scope="core-plugin"
-                        module="ClustersModule"
-                        to="create"
-                      />
-                    )}
+                  <PluginLink
+                    {...props}
+                    scope="core-plugin"
+                    module="ClustersModule"
+                    to="create"
+                  />
+                )}
               >
                 Create cluster
               </Button>
