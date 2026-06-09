@@ -1,3 +1,5 @@
+import "./MttrTrend.scss";
+
 import {
   Chart,
   ChartAxis,
@@ -6,8 +8,8 @@ import {
   ChartThemeColor,
   ChartVoronoiContainer,
 } from "@patternfly/react-charts/victory";
+
 import { mttrHistory } from "../mockData";
-import "./MttrTrend.scss";
 
 const axisStyle = {
   tickLabels: { fill: "var(--pf-t--global--text--color--regular)" },

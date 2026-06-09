@@ -1,11 +1,13 @@
-import { useMemo } from "react";
+import "./FleetHealthGrouped.scss";
+
 import { Label, Stack, StackItem } from "@patternfly/react-core";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@patternfly/react-icons";
+import { useMemo } from "react";
+
 import { useFleetDataContext } from "../useFleetData";
-import "./FleetHealthGrouped.scss";
 
 interface EnvGroup {
   name: string;

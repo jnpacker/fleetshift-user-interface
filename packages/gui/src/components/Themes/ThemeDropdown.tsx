@@ -1,16 +1,17 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import "./ThemeDropdown.scss";
+
 import {
   MenuToggle,
   Panel,
   PanelMain,
   PanelMainBody,
+  Title,
   ToggleGroup,
   ToggleGroupItem,
-  Title,
 } from "@patternfly/react-core";
 import { Popper } from "@patternfly/react-core/dist/esm/helpers/Popper/Popper";
 import { PaletteIcon } from "@patternfly/react-icons";
-import "./ThemeDropdown.scss";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Theme = "default" | "felt";
 type ColorScheme = "system" | "light" | "dark";

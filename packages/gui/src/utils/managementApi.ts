@@ -5,11 +5,11 @@
  */
 
 import type {
-  MgmtDeployment,
-  ListDeploymentsResponse,
-  CreateDeploymentRequest,
   AuthMethod,
   CreateAuthMethodRequest,
+  CreateDeploymentRequest,
+  ListDeploymentsResponse,
+  MgmtDeployment,
 } from "../types/management";
 
 const BASE = "/api/v1/management";

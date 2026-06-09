@@ -1,11 +1,12 @@
+import "./AnimatedHeight.scss";
+
 import {
   motion,
+  type SpringOptions,
   useMotionValue,
   useSpring,
-  type SpringOptions,
 } from "motion/react";
-import { useRef, useEffect, type ReactNode } from "react";
-import "./AnimatedHeight.scss";
+import { type ReactNode, useEffect, useRef } from "react";
 
 const springConfig: SpringOptions = {
   stiffness: 200,

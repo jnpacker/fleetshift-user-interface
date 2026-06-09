@@ -1,4 +1,4 @@
-import type { Extension, CodeRef } from "@openshift/dynamic-plugin-sdk";
+import type { CodeRef, Extension } from "@openshift/dynamic-plugin-sdk";
 import type { ComponentType } from "react";
 
 export type DashboardWidgetExtension = Extension<

@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import "./FleetCapacity.scss";
+
 import {
   Progress,
   ProgressMeasureLocation,
   Stack,
   StackItem,
 } from "@patternfly/react-core";
+import { useMemo } from "react";
+
 import { useFleetDataContext } from "../useFleetData";
-import "./FleetCapacity.scss";
 
 const variant = (pct: number) =>
   pct >= 80 ? "danger" : pct >= 65 ? "warning" : undefined;

@@ -1,21 +1,8 @@
 import "./overview-dashboard.scss";
-import MttrTrend from "./widgets/MttrTrend";
-import ActiveIncidents from "./widgets/ActiveIncidents";
-import FleetHealthGrouped from "./widgets/FleetHealthGrouped";
-import GlobalMap from "./widgets/GlobalMap";
-import ComplianceStatus from "./widgets/ComplianceStatus";
-import VersionDistribution from "./widgets/VersionDistribution";
-import ClustersAttention from "./widgets/ClustersAttention";
-import FleetCapacity from "./widgets/FleetCapacity";
-import {
-  WidgetLayout,
-  WidgetMapping,
-  type ExtendedTemplateConfig,
-} from "@patternfly/widgetized-dashboard";
 import "@patternfly/widgetized-dashboard/dist/esm/styles.css";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import SloErrorBudgets from "./widgets/SloErrorBudgets";
+
 import {
   BundleIcon,
   ChartLineIcon,
@@ -27,7 +14,22 @@ import {
   ShieldAltIcon,
   TachometerAltIcon,
 } from "@patternfly/react-icons";
+import {
+  type ExtendedTemplateConfig,
+  WidgetLayout,
+  WidgetMapping,
+} from "@patternfly/widgetized-dashboard";
+
 import { FleetDataContext, useFleetData } from "./useFleetData";
+import ActiveIncidents from "./widgets/ActiveIncidents";
+import ClustersAttention from "./widgets/ClustersAttention";
+import ComplianceStatus from "./widgets/ComplianceStatus";
+import FleetCapacity from "./widgets/FleetCapacity";
+import FleetHealthGrouped from "./widgets/FleetHealthGrouped";
+import GlobalMap from "./widgets/GlobalMap";
+import MttrTrend from "./widgets/MttrTrend";
+import SloErrorBudgets from "./widgets/SloErrorBudgets";
+import VersionDistribution from "./widgets/VersionDistribution";
 
 const LAYOUT_VERSION = 8;
 const STORAGE_KEY = "fleetshift:dashboard-layout";

@@ -1,6 +1,7 @@
+import "../MotionPolling.scss";
+
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
-import "../MotionPolling.scss";
 
 type MotionPollingAnimationProps = {
   children?: ReactNode;

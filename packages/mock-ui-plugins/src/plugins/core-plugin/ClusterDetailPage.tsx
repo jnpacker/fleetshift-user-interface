@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import "./ClusterDetailPage.scss";
+
 import { PluginLink, usePluginNavigate } from "@fleetshift/common";
+import { PageHeader } from "@patternfly/react-component-groups/dist/dynamic/PageHeader";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -32,18 +33,17 @@ import {
   TabTitleText,
   Title,
 } from "@patternfly/react-core";
-import { PageHeader } from "@patternfly/react-component-groups/dist/dynamic/PageHeader";
-
-import "./ClusterDetailPage.scss";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import {
+  deleteGcpHcpCluster,
   type GcpHcpCluster,
   getGcpHcpCluster,
-  deleteGcpHcpCluster,
   resumeGcpHcpCluster,
 } from "../gcphcp-plugin/api";
-import { stateLabel, formatTime } from "../gcphcp-plugin/gcpHcpUtils";
 import GcpHcpDeliveryEventsTab from "../gcphcp-plugin/GcpHcpDeliveryEventsTab";
+import { formatTime, stateLabel } from "../gcphcp-plugin/gcpHcpUtils";
 
 function OverviewTab({ cluster }: { cluster: GcpHcpCluster }) {
   const sl = stateLabel(cluster.state);

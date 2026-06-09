@@ -1,10 +1,10 @@
-import { ReactNode } from "react";
 import {
   DescriptionList,
   DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
 } from "@patternfly/react-core";
+import { ReactNode } from "react";
 
 export type EnrollmentDLProps = {
   enrollmentName?: ReactNode;

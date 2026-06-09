@@ -1,7 +1,7 @@
-import path from "path";
-import * as glob from "glob";
-import fs from "fs";
 import chalk from "chalk";
+import fs from "fs";
+import * as glob from "glob";
+import path from "path";
 
 const checkPfVersion = (version: string) => {
   const number = version?.replace(/[^0-9]/g, "");

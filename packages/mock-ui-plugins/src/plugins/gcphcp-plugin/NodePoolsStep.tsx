@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { CodeEditor, Language } from "@patternfly/react-code-editor";
 import {
   Button,
   Checkbox,
@@ -19,9 +19,10 @@ import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@patternfly/react-core";
-import { CodeEditor, Language } from "@patternfly/react-code-editor";
-import TrashIcon from "@patternfly/react-icons/dist/dynamic/icons/trash-icon";
 import PlusCircleIcon from "@patternfly/react-icons/dist/dynamic/icons/plus-circle-icon";
+import TrashIcon from "@patternfly/react-icons/dist/dynamic/icons/trash-icon";
+import { useCallback, useEffect, useState } from "react";
+
 import type { GcpHcpFormData, NodepoolEntry } from "./CreateGcpHcpWizard";
 
 interface NodePoolsStepProps {

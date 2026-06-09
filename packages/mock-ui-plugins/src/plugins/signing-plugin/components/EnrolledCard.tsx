@@ -8,6 +8,7 @@ import {
   Title,
 } from "@patternfly/react-core";
 import { CheckCircleIcon } from "@patternfly/react-icons";
+
 import EnrollmentDL, { EnrollmentDLProps } from "./EnrollmentDL";
 
 export type EnrolledCardProps = EnrollmentDLProps & {

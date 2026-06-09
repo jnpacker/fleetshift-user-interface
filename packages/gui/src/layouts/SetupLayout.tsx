@@ -1,4 +1,5 @@
-import { Outlet } from "react-router-dom";
+import "./SetupLayout.scss";
+
 import {
   Masthead,
   MastheadBrand,
@@ -11,10 +12,10 @@ import {
   ToolbarItem,
 } from "@patternfly/react-core";
 import { MoonIcon, SunIcon, WineGlassIcon } from "@patternfly/react-icons";
+import { Outlet } from "react-router-dom";
+
 import logo from "../assets/masthead.png";
 import ThemeToggle, { ThemeToggleType } from "../components/Themes/ThemeToggle";
-
-import "./SetupLayout.scss";
 
 const SetupMasthead = () => (
   <Masthead>

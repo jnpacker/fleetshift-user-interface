@@ -1,3 +1,5 @@
+import "./ActiveIncidents.scss";
+
 import {
   Card,
   CardBody,
@@ -10,8 +12,8 @@ import {
   ExclamationTriangleIcon,
   InfoCircleIcon,
 } from "@patternfly/react-icons";
+
 import { incidents } from "../mockData";
-import "./ActiveIncidents.scss";
 
 const severityIcon = (s: "critical" | "warning" | "info") => {
   switch (s) {

@@ -1,7 +1,9 @@
-import { useMemo } from "react";
-import { ChartDonut } from "@patternfly/react-charts/victory";
-import { useFleetDataContext } from "../useFleetData";
 import "./VersionDistribution.scss";
+
+import { ChartDonut } from "@patternfly/react-charts/victory";
+import { useMemo } from "react";
+
+import { useFleetDataContext } from "../useFleetData";
 
 export default function VersionDistribution(_props: { widgetId: string }) {
   const { clusters } = useFleetDataContext();

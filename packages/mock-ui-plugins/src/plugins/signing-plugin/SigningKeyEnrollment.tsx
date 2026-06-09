@@ -1,3 +1,5 @@
+import "./SetupPage.scss";
+
 import {
   Alert,
   Button,
@@ -12,13 +14,13 @@ import {
 } from "@patternfly/react-core";
 import { KeyIcon } from "@patternfly/react-icons";
 import { AnimatePresence, motion } from "motion/react";
-import { EnrollStep, useSigningKeyEnrollment } from "./useSigningKeyEnrollment";
-import "./SetupPage.scss";
+
 import AnimatedHeight from "./components/AnimatedHeight";
 import EnrollmentDL from "./components/EnrollmentDL";
 import EnrollmentError from "./components/EnrollmentError";
 import GHEnroll from "./components/GHEnroll";
 import OIDCEnroll from "./components/OIDCEnroll";
+import { EnrollStep, useSigningKeyEnrollment } from "./useSigningKeyEnrollment";
 
 const messages: Record<string, string> = {
   loading: "Loading configuration...",

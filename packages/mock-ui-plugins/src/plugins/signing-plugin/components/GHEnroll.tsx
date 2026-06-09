@@ -11,11 +11,11 @@ import {
   StackItem,
 } from "@patternfly/react-core";
 import { ExternalLinkAltIcon } from "@patternfly/react-icons";
+import { ReactNode } from "react";
 
 import ghSigningKeyImg from "../assets/gh-signing-screen.png";
 import ghSigningKeyDarkImg from "../assets/gh-signing-screen-dark.png";
 import MotionPollingAnimation from "./MotionPollingAnimation";
-import { ReactNode } from "react";
 
 export type GHEnrollProps = {
   githubUsername?: string | null;

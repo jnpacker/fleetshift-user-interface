@@ -1,5 +1,3 @@
-import { type ReactNode } from "react";
-import { Link } from "react-router-dom";
 import {
   Card,
   CardBody,
@@ -9,6 +7,8 @@ import {
   StackItem,
 } from "@patternfly/react-core";
 import clsx from "clsx";
+import { type ReactNode } from "react";
+import { Link } from "react-router-dom";
 
 export interface WorkloadOption {
   title: string;

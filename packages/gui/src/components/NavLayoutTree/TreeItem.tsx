@@ -1,14 +1,16 @@
+import "./TreeItem.scss";
+
 import { useSortable } from "@dnd-kit/react/sortable";
+import { Button } from "@patternfly/react-core";
 import {
   GripVerticalIcon,
-  TimesIcon,
   PencilAltIcon,
+  TimesIcon,
   TrashIcon,
 } from "@patternfly/react-icons";
-import { Button } from "@patternfly/react-core";
+
 import type { FlatNode } from "./utilities";
 import { INDENTATION } from "./utilities";
-import "./TreeItem.scss";
 
 interface TreeItemProps {
   node: FlatNode;

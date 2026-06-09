@@ -1,17 +1,16 @@
-import { type ReactNode, useMemo } from "react";
-import type { ComponentType } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { useResolvedExtensions } from "@openshift/dynamic-plugin-sdk";
-import type { CodeRef, Extension } from "@openshift/dynamic-plugin-sdk";
+import "./DayOnePage.scss";
+
 import { PluginLink } from "@fleetshift/common";
+import type { CodeRef, Extension } from "@openshift/dynamic-plugin-sdk";
+import { useResolvedExtensions } from "@openshift/dynamic-plugin-sdk";
 import {
   Breadcrumb,
   BreadcrumbItem,
   Bullseye,
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
   Content,
   Gallery,
   Label,
@@ -20,8 +19,9 @@ import {
   StackItem,
   Title,
 } from "@patternfly/react-core";
-
-import "./DayOnePage.scss";
+import type { ComponentType } from "react";
+import { type ReactNode, useMemo } from "react";
+import { Route, Routes, useNavigate } from "react-router-dom";
 
 interface SetupComponentProps {
   onSetupNext?: () => void;

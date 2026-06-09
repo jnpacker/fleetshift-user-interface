@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -13,6 +12,8 @@ import {
   Title,
 } from "@patternfly/react-core";
 import { useScalprum } from "@scalprum/react-core";
+import { useState } from "react";
+
 import { useAppConfig } from "../contexts/AppConfigContext";
 
 const JsonBlock = ({ data }: { data: unknown }) => (

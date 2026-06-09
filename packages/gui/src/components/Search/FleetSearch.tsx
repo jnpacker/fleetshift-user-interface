@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import "./FleetSearch.scss";
+
 import {
   Divider,
   Menu,
@@ -16,9 +16,11 @@ import {
   SearchIcon,
   ServerIcon,
 } from "@patternfly/react-icons";
-import { useSearch } from "./SearchProvider";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+
 import type { GroupedResults, SearchResultItem } from "./searchIndex";
-import "./FleetSearch.scss";
+import { useSearch } from "./SearchProvider";
 
 const CATEGORY_LABELS: Record<string, string> = {
   nav: "Pages",

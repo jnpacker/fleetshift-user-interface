@@ -1,12 +1,14 @@
-import { useMemo } from "react";
+import "./ClustersAttention.scss";
+
 import { Label, Stack, StackItem } from "@patternfly/react-core";
 import {
   ExclamationCircleIcon,
   ExclamationTriangleIcon,
 } from "@patternfly/react-icons";
-import { useFleetDataContext } from "../useFleetData";
+import { useMemo } from "react";
+
 import type { DashboardCluster } from "../useFleetData";
-import "./ClustersAttention.scss";
+import { useFleetDataContext } from "../useFleetData";
 
 interface AttentionItem {
   id: string;

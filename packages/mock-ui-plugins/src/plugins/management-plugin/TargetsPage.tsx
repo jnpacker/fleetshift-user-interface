@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Alert,
   Bullseye,
   Button,
   DescriptionList,
+  DescriptionListDescription,
   DescriptionListGroup,
   DescriptionListTerm,
-  DescriptionListDescription,
   EmptyState,
   EmptyStateBody,
   Flex,
@@ -23,14 +22,16 @@ import {
 } from "@patternfly/react-core";
 import { SyncAltIcon } from "@patternfly/react-icons";
 import {
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
   ExpandableRowContent,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from "@patternfly/react-table";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { listDeployments } from "./api";
 
 interface TargetInfo {

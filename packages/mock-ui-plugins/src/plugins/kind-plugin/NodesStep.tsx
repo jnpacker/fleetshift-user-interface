@@ -1,3 +1,5 @@
+import "./NodesStep.scss";
+
 import {
   Button,
   Form,
@@ -6,10 +8,10 @@ import {
   FormSelectOption,
   TextInput,
 } from "@patternfly/react-core";
-import TrashIcon from "@patternfly/react-icons/dist/dynamic/icons/trash-icon";
 import PlusCircleIcon from "@patternfly/react-icons/dist/dynamic/icons/plus-circle-icon";
+import TrashIcon from "@patternfly/react-icons/dist/dynamic/icons/trash-icon";
+
 import type { ClusterFormData, NodeEntry } from "./CreateClusterWizard";
-import "./NodesStep.scss";
 
 interface NodesStepProps {
   formData: ClusterFormData;

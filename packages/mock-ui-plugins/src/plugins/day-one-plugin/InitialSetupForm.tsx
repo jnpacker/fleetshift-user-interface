@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import "../signing-plugin/SetupPage.scss";
+
 import {
   ActionGroup,
   Alert,
@@ -25,7 +26,7 @@ import {
   Title,
 } from "@patternfly/react-core";
 import { CheckCircleIcon } from "@patternfly/react-icons";
-import "../signing-plugin/SetupPage.scss";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface SetupPageProps {
   onSetupNext?: () => void;

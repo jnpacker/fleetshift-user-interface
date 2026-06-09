@@ -37,7 +37,8 @@ FleetShift UI monorepo — React 18 shell + Scalprum micro-frontend plugins, web
 
 ## Style
 
-- TypeScript strict. Avoid `any` — use `unknown` + narrowing or define a type.
+- TypeScript strict. `no-explicit-any` is enforced — use `unknown` + narrowing or define a type. In tests, `as unknown as X` is acceptable for stubs; in production code, prefer type guards over type assertions.
+- Import order: side-effect imports first, then node_modules, then local (relative). Enforced by `simple-import-sort`. Run `npm run lint:fix` to auto-sort.
 - ESLint flat config + Prettier (double quotes, trailing commas). `npm run lint` / `lint:fix`.
 - No default exports except MF-exposed page components.
 - Prefer named function declarations for components (better DevTools + stack traces).
