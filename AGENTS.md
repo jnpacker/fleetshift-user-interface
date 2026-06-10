@@ -4,7 +4,7 @@ FleetShift UI monorepo — React 18 shell + Scalprum micro-frontend plugins, web
 
 ## Source of truth
 
-**Code > docs > diagrams.** If they disagree, code wins — update the doc/diagram. Design docs live in `docs/`. Architecture diagrams live in `docs/diagrams/` (LikeC4 `.c4` files). Update/create when making design changes.
+**Code > docs > diagrams.** Disagree → code wins, update doc/diagram. Design docs: `docs/`. Architecture diagrams: `docs/diagrams/` (LikeC4 `.c4`). Update on design changes.
 
 ## Packages
 
@@ -112,12 +112,12 @@ npm test                   # vitest
 
 ## Diagrams
 
-- Architecture diagrams in `docs/diagrams/` use LikeC4 (`.c4` files). Config: `docs/diagrams/likec4.config.json`.
-- **Code is source of truth.** After changing search, extensions, build pipeline, or plugin registration code, validate the relevant diagram still matches. Read the affected `.c4` file, compare against the code you changed, and update the diagram if it diverged.
-- Diagrams should be **generic**, not specific. Model the architectural pattern (modules → extensionPoints → extensions), not concrete instances (fleetshift.cluster-provider, fleetshift.setup). Specific types are examples in descriptions, not first-class diagram components.
-- Current diagrams:
-  - `feature-contract.c4` — build-time validation, plugin extension model, Go backend manifest reading, shell rendering. Validate after changes to `packages/build-utils/src/extensions/`, `packages/mock-ui-plugins/webpack.config.ts`, or `packages/gui/src/extensions/`.
-  - `search.c4` — search indexing, extensionPoint linking, query/grouping flow. Validate after changes to `packages/gui/src/components/Search/`.
+- `docs/diagrams/` — LikeC4 `.c4` files. Config: `docs/diagrams/likec4.config.json`.
+- **Code > diagrams.** Changed search/extensions/build/plugin code → validate `.c4` still matches. Diverged → update diagram.
+- **Generic, not specific.** Model pattern (modules → extensionPoints → extensions), not instances. Specific types = examples in descriptions only.
+- Current:
+  - `feature-contract.c4` — build validation, extension model, Go backend manifests, shell rendering. Trigger: `packages/build-utils/src/extensions/`, `packages/mock-ui-plugins/webpack.config.ts`, `packages/gui/src/extensions/`.
+  - `search.c4` — indexing, extensionPoint linking, query/grouping. Trigger: `packages/gui/src/components/Search/`.
 
 ## Verification
 
