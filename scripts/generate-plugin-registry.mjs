@@ -15,6 +15,8 @@ const pluginMeta = [
   { name: "routing-plugin", key: "routing", label: "Routing", persona: "ops" },
   { name: "gcphcp-plugin", key: "gcphcp", label: "GCP HCP", persona: "ops" },
   { name: "overview-plugin", key: "overview", label: "Overview", persona: "ops" },
+  { name: "configuration-plugin", key: "configuration", label: "Configuration", persona: "obs" },
+  { name: "settings-plugin", key: "settings", label: "Settings", persona: "obs" }
 ];
 
 const metaByName = new Map(pluginMeta.map((p) => [p.name, p]));

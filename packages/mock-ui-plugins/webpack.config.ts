@@ -331,6 +331,57 @@ const KindPlugin = new FleetshiftPlugin({
   },
 });
 
+const SettingsPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "settings",
+      label: "Settings",
+      component: { $codeRef: "SettingsPage.default" },
+      description: "Manage nav layout and workspace preferences",
+      keywords: ["settings", "preferences", "nav", "order"],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename: "plugins/settings/settings-plugin.[contenthash].js",
+  pluginManifestFilename: "plugins/settings/settings-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "settings-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      SettingsPage: p("./src/plugins/settings-plugin/SettingsPage.tsx"),
+    },
+  },
+});
+
+const ConfigurationPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "configuration",
+      label: "Configuration",
+      component: { $codeRef: "ConfigurationPage.default" },
+      description:
+        "Deploy and manage applications across your OpenShift fleet using GitOps and Helm. Keep workloads consistent as you scale from a single cluster to many.",
+      keywords: ["configuration", "gitops", "helm", "deploy", "applications"],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename:
+    "plugins/configuration/configuration-plugin.[contenthash].js",
+  pluginManifestFilename:
+    "plugins/configuration/configuration-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "configuration-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      ConfigurationPage: p(
+        "./src/plugins/configuration-plugin/ConfigurationPage.tsx",
+      ),
+    },
+  },
+});
+
 const pluginConfigs = [
   { plugin: OverviewPlugin, key: "overview" },
   { plugin: ManagementPlugin, key: "management" },
@@ -340,6 +391,8 @@ const pluginConfigs = [
   { plugin: RoutingPlugin, key: "routing" },
   { plugin: GcpHcpPlugin, key: "gcphcp" },
   { plugin: KindPlugin, key: "kind" },
+  { plugin: ConfigurationPlugin, key: "configuration" },
+  { plugin: SettingsPlugin, key: "settings" },
 ] as const;
 
 const configs: Configuration[] = pluginConfigs.map(({ plugin, key }) => ({
