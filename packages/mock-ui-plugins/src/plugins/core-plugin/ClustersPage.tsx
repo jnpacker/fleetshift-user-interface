@@ -41,6 +41,7 @@ import {
 import { CubesIcon } from "@patternfly/react-icons";
 import { ActionsColumn, Tbody, Td, Tr } from "@patternfly/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import {
   deleteGcpHcpCluster,
@@ -53,6 +54,7 @@ import {
   stateLabel,
 } from "../gcphcp-plugin/gcpHcpUtils";
 import ClusterSummaryCards from "./ClusterSummaryCards";
+import CreateClusterModal from "./CreateClusterModal";
 
 interface ClusterFilters {
   name: string;
@@ -80,6 +82,23 @@ export default function ClustersPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [silentFailCount, setSilentFailCount] = useState(0);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const createParam = searchParams.get("create");
+  const wizardOpen = createParam !== null;
+  const preselectedProvider =
+    createParam && createParam !== "" ? createParam : null;
+
+  const openCreateWizard = useCallback(() => {
+    setSearchParams({ create: "" });
+  }, [setSearchParams]);
+
+  const selectProvider = useCallback(
+    (providerId: string) => {
+      setSearchParams({ create: providerId });
+    },
+    [setSearchParams],
+  );
 
   const { filters, onSetFilters, clearAllFilters } =
     useDataViewFilters<ClusterFilters>({ initialFilters: { name: "" } });
@@ -109,6 +128,11 @@ export default function ClustersPage() {
       if (!silent) setLoading(false);
     }
   }, []);
+
+  const closeCreateWizard = useCallback(() => {
+    setSearchParams({});
+    fetchClusters(true);
+  }, [setSearchParams, fetchClusters]);
 
   useEffect(() => {
     fetchClusters();
@@ -225,16 +249,7 @@ export default function ClustersPage() {
             <EmptyStateFooter>
               <EmptyStateActions>
                 {rows.length === 0 ? (
-                  <Button
-                    variant="primary"
-                    component={(props) => (
-                      <PluginLink
-                        {...props}
-                        scope="core-plugin"
-                        module="CreateClusterModule"
-                      />
-                    )}
-                  >
+                  <Button variant="primary" onClick={openCreateWizard}>
                     Create cluster
                   </Button>
                 ) : (
@@ -290,16 +305,7 @@ export default function ClustersPage() {
             clearAllFilters={clearAllFilters}
             className="ome-core-clusters-toolbar"
             actions={
-              <Button
-                variant="primary"
-                component={(props) => (
-                  <PluginLink
-                    {...props}
-                    scope="core-plugin"
-                    module="CreateClusterModule"
-                  />
-                )}
-              >
+              <Button variant="primary" onClick={openCreateWizard}>
                 Create cluster
               </Button>
             }
@@ -373,6 +379,13 @@ export default function ClustersPage() {
           </Button>
         </ModalFooter>
       </Modal>
+
+      <CreateClusterModal
+        isOpen={wizardOpen}
+        preselectedProvider={preselectedProvider}
+        onClose={closeCreateWizard}
+        onProviderSelect={selectProvider}
+      />
     </Stack>
   );
 }

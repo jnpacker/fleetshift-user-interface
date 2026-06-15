@@ -1,20 +1,11 @@
+import type { ClusterProviderWizardProps } from "@fleetshift/common";
 import {
   buildSignedInputEnvelope,
   usePluginNavigate,
 } from "@fleetshift/common";
-import {
-  Alert,
-  Content,
-  PageSection,
-  Stack,
-  StackItem,
-  Title,
-  Wizard,
-  WizardStep,
-} from "@patternfly/react-core";
+import { Alert, Wizard, WizardStep } from "@patternfly/react-core";
 import { getModule } from "@scalprum/core";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { createDeployment } from "../management-plugin/api";
 import ClusterDetailsStep from "./ClusterDetailsStep";
@@ -48,16 +39,10 @@ const initialFormData: ClusterFormData = {
   signDeployment: false,
 };
 
-interface CreateClusterWizardProps {
-  onSetupNext?: () => void;
-  onSetupSkip?: () => void;
-}
-
 export default function CreateClusterWizard({
+  onClose,
   onSetupNext,
-  onSetupSkip: _onSetupSkip,
-}: CreateClusterWizardProps) {
-  const navigate = useNavigate();
+}: ClusterProviderWizardProps) {
   const clusters = usePluginNavigate("core-plugin", "ClustersModule");
   const [signingLoaded, setSigningLoaded] = useState(false);
   const [enrolled, setEnrolled] = useState(false);
@@ -91,8 +76,12 @@ export default function CreateClusterWizard({
   );
 
   const handleCancel = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    if (onClose) {
+      onClose();
+    } else {
+      clusters.navigate();
+    }
+  }, [onClose, clusters]);
 
   const handleSubmit = useCallback(async () => {
     if (!formData.name.trim()) {
@@ -185,6 +174,8 @@ export default function CreateClusterWizard({
 
       if (onSetupNext) {
         onSetupNext();
+      } else if (onClose) {
+        onClose();
       } else {
         clusters.navigate(formData.name.trim());
       }
@@ -193,87 +184,69 @@ export default function CreateClusterWizard({
     } finally {
       setCreating(false);
     }
-  }, [formData, enrolled, onSetupNext, clusters]);
+  }, [formData, enrolled, onSetupNext, onClose, clusters]);
 
   const isStep1Valid = formData.name.trim().length > 0;
 
   return (
-    <PageSection>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h1" size="xl">
-            Create a cluster for OpenShift Management Engine
-          </Title>
-          <Content component="p">
-            Configuring a dedicated cluster to offload management engine
-            operations and add-ons.
-          </Content>
-        </StackItem>
+    <>
+      {error && (
+        <Alert
+          variant="danger"
+          title="Cluster creation failed"
+          isInline
+          className="pf-v6-u-mb-md"
+          actionClose={
+            <button
+              className="pf-v6-c-alert__action-close"
+              onClick={() => setError(null)}
+            />
+          }
+        >
+          {error}
+        </Alert>
+      )}
+      <Wizard onClose={handleCancel} height={500} isVisitRequired>
+        <WizardStep
+          name="Cluster details"
+          id="cluster-details"
+          status={isStep1Valid ? "default" : "error"}
+          isDisabled={creating}
+          footer={{ isNextDisabled: !isStep1Valid }}
+        >
+          <ClusterDetailsStep formData={formData} onChange={updateField} />
+        </WizardStep>
 
-        {error && (
-          <StackItem>
-            <Alert
-              variant="danger"
-              title="Cluster creation failed"
-              isInline
-              actionClose={
-                <button
-                  className="pf-v6-c-alert__action-close"
-                  onClick={() => setError(null)}
-                />
-              }
-            >
-              {error}
-            </Alert>
-          </StackItem>
-        )}
+        <WizardStep name="Networking" id="networking" isDisabled={creating}>
+          <NetworkingStep formData={formData} onChange={updateField} />
+        </WizardStep>
 
-        <StackItem>
-          <Wizard onClose={handleCancel} height={500} isVisitRequired>
-            <WizardStep
-              name="Cluster details"
-              id="cluster-details"
-              status={isStep1Valid ? "default" : "error"}
-              isDisabled={creating}
-              footer={{
-                isNextDisabled: !isStep1Valid,
-              }}
-            >
-              <ClusterDetailsStep formData={formData} onChange={updateField} />
-            </WizardStep>
+        <WizardStep name="Nodes" id="nodes" isDisabled={creating}>
+          <NodesStep formData={formData} onChange={updateField} />
+        </WizardStep>
 
-            <WizardStep name="Networking" id="networking" isDisabled={creating}>
-              <NetworkingStep formData={formData} onChange={updateField} />
-            </WizardStep>
+        <WizardStep name="Settings" id="settings" isDisabled={creating}>
+          <SettingsStep
+            formData={formData}
+            onChange={updateField}
+            signingLoaded={signingLoaded}
+            signingEnrolled={enrolled}
+          />
+        </WizardStep>
 
-            <WizardStep name="Nodes" id="nodes" isDisabled={creating}>
-              <NodesStep formData={formData} onChange={updateField} />
-            </WizardStep>
-
-            <WizardStep name="Settings" id="settings" isDisabled={creating}>
-              <SettingsStep
-                formData={formData}
-                onChange={updateField}
-                signingLoaded={signingLoaded}
-                signingEnrolled={enrolled}
-              />
-            </WizardStep>
-
-            <WizardStep
-              name="Review"
-              id="review"
-              isDisabled={creating}
-              footer={{
-                nextButtonText: creating ? "Creating..." : "Create cluster",
-                onNext: handleSubmit,
-                isNextDisabled: creating,
-              }}
-            >
-              <ReviewStep formData={formData} />
-            </WizardStep>
-          </Wizard>
-        </StackItem>
-      </Stack>
-    </PageSection>
+        <WizardStep
+          name="Review"
+          id="review"
+          isDisabled={creating}
+          footer={{
+            nextButtonText: creating ? "Creating..." : "Create cluster",
+            onNext: handleSubmit,
+            isNextDisabled: creating,
+          }}
+        >
+          <ReviewStep formData={formData} />
+        </WizardStep>
+      </Wizard>
+    </>
   );
 }

@@ -37,7 +37,7 @@ RUN --mount=type=cache,target=/root/.npm \
     -w packages/gui \
     -w packages/mock-ui-plugins \
     && npm run build -w packages/common \
-    && npm run build -w packages/mock-ui-plugins \
+    && npm run build:ci -w packages/mock-ui-plugins \
     && node scripts/generate-plugin-registry.mjs \
     && npm run build -w packages/gui \
     && node scripts/merge-web.mjs \

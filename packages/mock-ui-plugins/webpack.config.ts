@@ -148,16 +148,7 @@ const CorePlugin = new FleetshiftPlugin({
       component: { $codeRef: "ClustersModule.default" },
       icon: { $codeRef: "ClustersIcon.default" },
       description: "View and manage your fleet of clusters",
-      keywords: ["cluster", "fleet", "manage"],
-    }),
-    createModule({
-      id: "create-cluster",
-      label: "Create Cluster",
-      component: { $codeRef: "CreateClusterModule.default" },
-      icon: { $codeRef: "CreateClusterIcon.default" },
-      description: "Launch the cluster creation wizard",
-      keywords: ["cluster", "create", "deploy", "provision", "wizard"],
-      searchResult: { $codeRef: "CreateClusterSearchResult.default" },
+      keywords: ["cluster", "fleet", "manage", "create", "deploy", "provision"],
       extensionPoints: {
         providers: {
           description: "Cluster providers available in the creation wizard",
@@ -176,13 +167,6 @@ const CorePlugin = new FleetshiftPlugin({
     exposedModules: {
       ClustersModule: p("./src/plugins/core-plugin/ClustersModule.tsx"),
       ClustersIcon: p("./src/plugins/core-plugin/ClustersIcon.tsx"),
-      CreateClusterModule: p(
-        "./src/plugins/core-plugin/CreateClusterModule.tsx",
-      ),
-      CreateClusterIcon: p("./src/plugins/core-plugin/CreateClusterIcon.tsx"),
-      CreateClusterSearchResult: p(
-        "./src/plugins/core-plugin/CreateClusterSearchResult.tsx",
-      ),
     },
   },
 });
@@ -259,7 +243,7 @@ const GcpHcpPlugin = new FleetshiftPlugin({
         "managed",
         "hcp",
       ],
-      to: { pathname: "gcphcp" },
+      to: { search: "?create=gcphcp" },
       icon: { $codeRef: "GcpHcpProviderCard.GcpHcpIcon" },
       card: { $codeRef: "GcpHcpProviderCard.default" },
       wizard: { $codeRef: "CreateGcpHcpWizard.default" },
@@ -319,7 +303,7 @@ const KindPlugin = new FleetshiftPlugin({
       label: "Kind",
       description: "Create a local Kind cluster for development and testing.",
       keywords: ["kind", "local", "development", "testing"],
-      to: { pathname: "kind" },
+      to: { search: "?create=kind" },
       icon: { $codeRef: "KindProviderCard.KindIcon" },
       card: { $codeRef: "KindProviderCard.default" },
       wizard: { $codeRef: "CreateClusterWizard.default" },

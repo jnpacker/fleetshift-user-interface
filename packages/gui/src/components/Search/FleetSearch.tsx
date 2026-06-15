@@ -16,7 +16,14 @@ import {
   SearchIcon,
   ServerIcon,
 } from "@patternfly/react-icons";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Link } from "react-router-dom";
 
 import type { GroupedResults, SearchResultItem } from "./searchIndex";
@@ -50,6 +57,22 @@ function ResultIcon({
 
 function HighlightedText({ html }: { html: string }) {
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
+const linkComponentCache = new Map<
+  string,
+  React.ForwardRefExoticComponent<React.RefAttributes<HTMLAnchorElement>>
+>();
+function getLinkComponent(to: string) {
+  let cached = linkComponentCache.get(to);
+  if (!cached) {
+    cached = forwardRef<
+      HTMLAnchorElement,
+      React.HTMLAttributes<HTMLAnchorElement>
+    >((props, ref) => <Link to={to} {...props} ref={ref} />);
+    linkComponentCache.set(to, cached);
+  }
+  return cached;
 }
 
 function totalCount(results: GroupedResults): number {
@@ -210,9 +233,7 @@ const FleetSearch = ({ onStateChange }: FleetSearchProps) => {
             <HighlightedText html={item.description} />
           ) : undefined
         }
-        component={(props: React.HTMLAttributes<HTMLAnchorElement>) => (
-          <Link to={item.pathname} {...props} />
-        )}
+        component={getLinkComponent(item.pathname)}
         onClick={clearSearch}
       >
         <HighlightedText html={item.title} />
@@ -279,9 +300,9 @@ const FleetSearch = ({ onStateChange }: FleetSearchProps) => {
             }
             const isLast = categoryOrder.length - 1 === idx;
             return (
-              <>
+              <Fragment key={cat}>
                 {!isLast ? <Divider /> : null}
-                <MenuGroup key={cat} label={CATEGORY_LABELS[cat] ?? cat}>
+                <MenuGroup label={CATEGORY_LABELS[cat] ?? cat}>
                   {parents.map((parent) => {
                     const featureId = toFeatureId(parent.id);
                     const children = childrenByFeature.get(featureId) ?? [];
@@ -309,7 +330,7 @@ const FleetSearch = ({ onStateChange }: FleetSearchProps) => {
                   {standalone.map((item) => renderItem(item))}
                   {orphanChildren.map((item) => renderItem(item))}
                 </MenuGroup>
-              </>
+              </Fragment>
             );
           })}
           {total === 0 && searchValue && (

@@ -167,7 +167,7 @@ model {
         advertise a type string. Other plugins register extensions
         against that type string to contribute content to the module.
 
-        Example: "Create Cluster" module declares extensionPoint
+        Example: "Clusters" module declares extensionPoint
         "providers" with type "fleetshift.cluster-provider".
       '''
     }

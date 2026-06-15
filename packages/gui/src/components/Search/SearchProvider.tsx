@@ -254,6 +254,24 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       if (extensionPoints) {
         for (const ep of Object.values(extensionPoints)) {
           typeToFeatureId.set(ep.type, globalFeatureId);
+
+          if (ep.type === "fleetshift.cluster-provider") {
+            const createId = `ext-${globalFeatureId}-create`;
+            inserts.push(
+              insertEntry(db, {
+                id: createId,
+                title: "Create cluster",
+                description: "Launch the cluster creation wizard",
+                category: "nav",
+                pathname: `${basePath}?create`,
+                icon: "",
+                status: moduleStatus,
+                meta: "create deploy provision wizard",
+                feature: globalFeatureId,
+              }),
+            );
+            if (icon) iconMapRef.current.set(createId, icon);
+          }
         }
       }
     }
