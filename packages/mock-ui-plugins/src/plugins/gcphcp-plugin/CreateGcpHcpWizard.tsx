@@ -1,16 +1,7 @@
+import type { ClusterProviderWizardProps } from "@fleetshift/common";
 import { usePluginNavigate } from "@fleetshift/common";
-import {
-  Alert,
-  Content,
-  PageSection,
-  Stack,
-  StackItem,
-  Title,
-  Wizard,
-  WizardStep,
-} from "@patternfly/react-core";
+import { Alert, Wizard, WizardStep } from "@patternfly/react-core";
 import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { createGcpHcpCluster } from "./api";
 import ClusterDetailsStep from "./ClusterDetailsStep";
@@ -53,15 +44,10 @@ const initialFormData: GcpHcpFormData = {
   ],
 };
 
-interface CreateGcpHcpWizardProps {
-  onSetupNext?: () => void;
-  onSetupSkip?: () => void;
-}
-
 export default function CreateGcpHcpWizard({
+  onClose,
   onSetupNext,
-}: CreateGcpHcpWizardProps) {
-  const navigate = useNavigate();
+}: ClusterProviderWizardProps) {
   const clusters = usePluginNavigate("core-plugin", "ClustersModule");
   const [formData, setFormData] = useState<GcpHcpFormData>(initialFormData);
   const [creating, setCreating] = useState(false);
@@ -75,8 +61,12 @@ export default function CreateGcpHcpWizard({
   );
 
   const handleCancel = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    if (onClose) {
+      onClose();
+    } else {
+      clusters.navigate();
+    }
+  }, [onClose, clusters]);
 
   const handleSubmit = useCallback(async () => {
     if (
@@ -118,6 +108,8 @@ export default function CreateGcpHcpWizard({
 
       if (onSetupNext) {
         onSetupNext();
+      } else if (onClose) {
+        onClose();
       } else {
         clusters.navigate();
       }
@@ -126,7 +118,7 @@ export default function CreateGcpHcpWizard({
     } finally {
       setCreating(false);
     }
-  }, [formData, onSetupNext, clusters]);
+  }, [formData, onSetupNext, onClose, clusters]);
 
   const isStep1Valid =
     /^[a-z][-a-z0-9]*$/.test(formData.clusterId.trim()) &&
@@ -137,72 +129,57 @@ export default function CreateGcpHcpWizard({
   );
 
   return (
-    <PageSection>
-      <Stack hasGutter>
-        <StackItem>
-          <Title headingLevel="h1" size="xl">
-            Create a GCP Hosted Control Plane cluster
-          </Title>
-          <Content component="p">
-            Configure a managed OpenShift cluster on Google Cloud Platform.
-          </Content>
-        </StackItem>
+    <>
+      {error && (
+        <Alert
+          variant="danger"
+          title="Cluster creation failed"
+          isInline
+          className="pf-v6-u-mb-md"
+          actionClose={
+            <button
+              className="pf-v6-c-alert__action-close"
+              onClick={() => setError(null)}
+            />
+          }
+        >
+          {error}
+        </Alert>
+      )}
+      <Wizard onClose={handleCancel} height={500} isVisitRequired>
+        <WizardStep
+          name="Cluster details"
+          id="cluster-details"
+          status={isStep1Valid ? "default" : "error"}
+          isDisabled={creating}
+          footer={{ isNextDisabled: !isStep1Valid }}
+        >
+          <ClusterDetailsStep formData={formData} onChange={updateField} />
+        </WizardStep>
 
-        {error && (
-          <StackItem>
-            <Alert
-              variant="danger"
-              title="Cluster creation failed"
-              isInline
-              actionClose={
-                <button
-                  className="pf-v6-c-alert__action-close"
-                  onClick={() => setError(null)}
-                />
-              }
-            >
-              {error}
-            </Alert>
-          </StackItem>
-        )}
+        <WizardStep
+          name="Node pools"
+          id="node-pools"
+          status={isStep2Valid ? "default" : "error"}
+          isDisabled={creating}
+          footer={{ isNextDisabled: !isStep2Valid }}
+        >
+          <NodePoolsStep formData={formData} onChange={updateField} />
+        </WizardStep>
 
-        <StackItem>
-          <Wizard onClose={handleCancel} height={500} isVisitRequired>
-            <WizardStep
-              name="Cluster details"
-              id="cluster-details"
-              status={isStep1Valid ? "default" : "error"}
-              isDisabled={creating}
-              footer={{ isNextDisabled: !isStep1Valid }}
-            >
-              <ClusterDetailsStep formData={formData} onChange={updateField} />
-            </WizardStep>
-
-            <WizardStep
-              name="Node pools"
-              id="node-pools"
-              status={isStep2Valid ? "default" : "error"}
-              isDisabled={creating}
-              footer={{ isNextDisabled: !isStep2Valid }}
-            >
-              <NodePoolsStep formData={formData} onChange={updateField} />
-            </WizardStep>
-
-            <WizardStep
-              name="Review"
-              id="review"
-              isDisabled={creating}
-              footer={{
-                nextButtonText: creating ? "Creating..." : "Create cluster",
-                onNext: handleSubmit,
-                isNextDisabled: creating,
-              }}
-            >
-              <ReviewStep formData={formData} />
-            </WizardStep>
-          </Wizard>
-        </StackItem>
-      </Stack>
-    </PageSection>
+        <WizardStep
+          name="Review"
+          id="review"
+          isDisabled={creating}
+          footer={{
+            nextButtonText: creating ? "Creating..." : "Create cluster",
+            onNext: handleSubmit,
+            isNextDisabled: creating,
+          }}
+        >
+          <ReviewStep formData={formData} />
+        </WizardStep>
+      </Wizard>
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import { useExtensionInstall } from "@fleetshift/common";
 import { useResolvedExtensions } from "@openshift/dynamic-plugin-sdk";
 import {
   createContext,
@@ -109,6 +110,11 @@ const SETTINGS: Omit<SearchEntry, "category" | "icon">[] = [
 
 export function SearchProvider({ children }: { children: ReactNode }) {
   const { pluginPages } = useAppConfig();
+  const {
+    loaded: installLoaded,
+    isInstalled,
+    state: installState,
+  } = useExtensionInstall();
   const [moduleExtensions, modulesLoaded] =
     useResolvedExtensions(isModuleExtension);
   const [cpExtensions, cpLoaded] = useResolvedExtensions(
@@ -122,11 +128,18 @@ export function SearchProvider({ children }: { children: ReactNode }) {
   );
   const iconMapRef = useRef(new Map<string, React.ComponentType>());
   const featureParentRef = useRef(new Map<string, SearchResultItem>());
-  const builtRef = useRef(false);
+  const installVersion = useRef(0);
+  const prevInstallState = useRef(installState);
+
+  if (prevInstallState.current !== installState) {
+    prevInstallState.current = installState;
+    installVersion.current += 1;
+  }
+
+  const currentInstallVersion = installVersion.current;
 
   useEffect(() => {
-    if (!modulesLoaded || !cpLoaded || !setupLoaded || builtRef.current) return;
-    builtRef.current = true;
+    if (!modulesLoaded || !cpLoaded || !setupLoaded || !installLoaded) return;
 
     const db = createSearchDB();
     dbRef.current = db;
@@ -151,6 +164,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
 
       const navId = `nav-${page.id}`;
       const pathname = `/${page.path}`;
+      const status = isInstalled(page.scope) ? "" : "not-enabled";
       inserts.push(
         insertEntry(db, {
           id: navId,
@@ -159,7 +173,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           category: "nav",
           pathname,
           icon: "CubesIcon",
-          status: "",
+          status,
           meta: page.path,
         }),
       );
@@ -171,7 +185,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         category: "nav",
         pathname,
         icon: "CubesIcon",
-        status: "",
+        status,
       });
     }
 
@@ -200,6 +214,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         keywords,
         extensionPoints,
         searchResult,
+        icon,
       } = ext.properties;
 
       const page = pluginPages.find((p) => p.title === label);
@@ -208,6 +223,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       const globalFeatureId = `${page.pluginKey}.${id}`;
       const basePath = `/${page.path}`;
       const entryId = `ext-${globalFeatureId}`;
+      const moduleStatus = isInstalled(page.scope) ? "" : "not-enabled";
 
       inserts.push(
         insertEntry(db, {
@@ -216,12 +232,15 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           description: description ?? `Navigate to ${label}`,
           category: "nav",
           pathname: basePath,
-          icon: "CubesIcon",
-          status: "",
+          icon: "",
+          status: moduleStatus,
           meta: keywords ? keywords.join(" ") : "",
         }),
       );
 
+      if (icon) {
+        iconMapRef.current.set(entryId, icon);
+      }
       if (searchResult) {
         componentMapRef.current.set(entryId, searchResult);
       }
@@ -232,13 +251,31 @@ export function SearchProvider({ children }: { children: ReactNode }) {
         description: description ?? `Navigate to ${label}`,
         category: "nav",
         pathname: basePath,
-        icon: "CubesIcon",
-        status: "",
+        icon: "",
+        status: moduleStatus,
       });
 
       if (extensionPoints) {
         for (const ep of Object.values(extensionPoints)) {
           typeToFeatureId.set(ep.type, globalFeatureId);
+
+          if (ep.type === "fleetshift.cluster-provider") {
+            const createId = `ext-${globalFeatureId}-create`;
+            inserts.push(
+              insertEntry(db, {
+                id: createId,
+                title: "Create cluster",
+                description: "Launch the cluster creation wizard",
+                category: "nav",
+                pathname: `${basePath}?create`,
+                icon: "",
+                status: moduleStatus,
+                meta: "create deploy provision wizard",
+                feature: globalFeatureId,
+              }),
+            );
+            if (icon) iconMapRef.current.set(createId, icon);
+          }
         }
       }
     }
@@ -324,10 +361,13 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     modulesLoaded,
     cpLoaded,
     setupLoaded,
+    installLoaded,
+    isInstalled,
     moduleExtensions,
     cpExtensions,
     setupExtensions,
     pluginPages,
+    currentInstallVersion,
   ]);
 
   const query = useCallback(async (term: string): Promise<GroupedResults> => {

@@ -1,8 +1,16 @@
 import {
+  CORE_EXTENSION_META,
+  orderByIds,
+  useExtensionInstall,
+  useNavOrder,
+} from "@fleetshift/common";
+import { useResolvedExtensions } from "@openshift/dynamic-plugin-sdk";
+import {
   Divider,
   Dropdown,
   DropdownItem,
   DropdownList,
+  Icon,
   Masthead,
   MastheadBrand,
   MastheadContent,
@@ -11,6 +19,7 @@ import {
   MastheadToggle,
   MenuToggle,
   Nav,
+  NavGroup,
   NavItem,
   NavList,
   Page,
@@ -22,8 +31,11 @@ import {
   ToolbarContent,
   ToolbarGroup,
   ToolbarItem,
+  Tooltip,
 } from "@patternfly/react-core";
-import { BarsIcon, BugIcon } from "@patternfly/react-icons";
+import { BarsIcon, BugIcon, PuzzlePieceIcon } from "@patternfly/react-icons";
+import clsx from "clsx";
+import type { ComponentType } from "react";
 import { useMemo, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 
@@ -34,6 +46,7 @@ import ThemeDropdown from "../components/Themes/ThemeDropdown";
 import type { PluginPage } from "../contexts/AppConfigContext";
 import { useAppConfig } from "../contexts/AppConfigContext";
 import { useAuth } from "../contexts/AuthContext";
+import { isModuleExtension } from "../extensions/isModuleExtension";
 
 const AppMasthead = () => {
   const { user, logout } = useAuth();
@@ -107,6 +120,17 @@ const AppMasthead = () => {
 const AppNav = () => {
   const location = useLocation();
   const { pluginPages, navLayout } = useAppConfig();
+  const { order: savedOrder } = useNavOrder();
+  const { isInstalled } = useExtensionInstall();
+  const [moduleExtensions] = useResolvedExtensions(isModuleExtension);
+
+  const iconMap = useMemo(() => {
+    const map = new Map<string, ComponentType>();
+    for (const ext of moduleExtensions) {
+      map.set(ext.properties.label, ext.properties.icon);
+    }
+    return map;
+  }, [moduleExtensions]);
 
   const pageMap = useMemo(() => {
     const map = new Map<string, PluginPage>();
@@ -116,35 +140,83 @@ const AppNav = () => {
     return map;
   }, [pluginPages]);
 
-  const navItems = useMemo(() => {
-    const items: PluginPage[] = [];
+  const { mainItems, bottomItems } = useMemo(() => {
+    const all: PluginPage[] = [];
     for (const entry of navLayout) {
       if (entry.type === "page") {
         const page = pageMap.get(entry.pageId);
-        if (page) items.push(page);
+        if (page) all.push(page);
       }
     }
-    return items.sort((a, b) => a.title.localeCompare(b.title));
-  }, [navLayout, pageMap]);
+    const main: PluginPage[] = [];
+    const bottom: PluginPage[] = [];
+    for (const page of all) {
+      const meta = CORE_EXTENSION_META[page.scope];
+      if (meta?.navSection === "bottom") {
+        bottom.push(page);
+      } else {
+        main.push(page);
+      }
+    }
+    return {
+      mainItems: orderByIds(main, savedOrder, "title"),
+      bottomItems: orderByIds(bottom, savedOrder, "title"),
+    };
+  }, [navLayout, pageMap, savedOrder]);
+
+  const renderNavItem = (page: PluginPage) => {
+    const fullPath = `/${page.path}`;
+    const NavIcon = iconMap.get(page.title);
+    const enabled = isInstalled(page.scope);
+
+    const DisplayIcon = enabled ? NavIcon : PuzzlePieceIcon;
+
+    const link = (
+      <Link
+        to={fullPath}
+        className={clsx("pf-v6-c-nav__link", {
+          "pf-v6-u-text-color-disabled": !enabled,
+        })}
+      >
+        {DisplayIcon && (
+          <Icon isInline className="pf-v6-u-mr-sm">
+            <DisplayIcon />
+          </Icon>
+        )}
+        {page.title}
+      </Link>
+    );
+
+    return (
+      <NavItem
+        key={page.id}
+        isActive={
+          location.pathname === fullPath ||
+          location.pathname.startsWith(fullPath + "/")
+        }
+      >
+        {enabled ? (
+          link
+        ) : (
+          <Tooltip content="This extension is not enabled. Click to enable it.">
+            {link}
+          </Tooltip>
+        )}
+      </NavItem>
+    );
+  };
 
   return (
     <Nav>
-      <NavList>
-        {navItems.map((page) => {
-          const fullPath = `/${page.path}`;
-          return (
-            <NavItem
-              key={page.id}
-              isActive={
-                location.pathname === fullPath ||
-                location.pathname.startsWith(fullPath + "/")
-              }
-            >
-              <Link to={fullPath}>{page.title}</Link>
-            </NavItem>
-          );
-        })}
-      </NavList>
+      <NavList>{mainItems.map(renderNavItem)}</NavList>
+      {bottomItems.length > 0 && (
+        <>
+          <Divider />
+          <NavGroup title="Settings">
+            <NavList>{bottomItems.map(renderNavItem)}</NavList>
+          </NavGroup>
+        </>
+      )}
     </Nav>
   );
 };

@@ -8,13 +8,17 @@ const outputDir = process.argv[2] ? resolve(process.argv[2]) : distDir;
 
 const pluginMeta = [
   { name: "management-plugin", key: "management", label: "Management", persona: "ops" },
-  { name: "day-one-plugin", key: "day-one", label: "Day One", persona: "ops" },
   { name: "core-plugin", key: "core", label: "Core Plugin", persona: "ops" },
   { name: "kind-plugin", key: "kind", label: "Kind", persona: "ops" },
   { name: "signing-plugin", key: "signing", label: "Signing Keys", persona: "ops" },
   { name: "routing-plugin", key: "routing", label: "Routing", persona: "ops" },
   { name: "gcphcp-plugin", key: "gcphcp", label: "GCP HCP", persona: "ops" },
   { name: "overview-plugin", key: "overview", label: "Overview", persona: "ops" },
+  { name: "configuration-plugin", key: "configuration", label: "Configuration", persona: "obs" },
+  { name: "virtualization-plugin", key: "virtualization", label: "Virtualization", persona: "obs" },
+  { name: "security-plugin", key: "security", label: "Security", persona: "obs" },
+  { name: "observability-plugin", key: "observability", label: "Observability", persona: "obs" },
+  { name: "settings-plugin", key: "settings", label: "Settings", persona: "obs" }
 ];
 
 const metaByName = new Map(pluginMeta.map((p) => [p.name, p]));

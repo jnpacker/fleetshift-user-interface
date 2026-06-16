@@ -186,7 +186,7 @@ model {
         Phase 2 — Extension scan:
         Iterates ALL other resolved extensions. For each:
         • Looks up its type in typeToFeatureId → finds parent module
-        • Composes route: parent basePath + extension to.pathname
+        • Composes route: parent basePath + extension to (pathname and/or search params)
         • Inserts into Orama with feature field linking to parent
         • Stores resolved searchResult / searchIcon components in ref maps
 
@@ -328,10 +328,10 @@ views {
       Search discovers the relationship at index time via typeToFeatureId —
       it never hard-codes knowledge of specific extension types.
 
-      Example: the "Create Cluster" module declares an extensionPoint
+      Example: the "Clusters" module declares an extensionPoint
       with type "fleetshift.cluster-provider". Any plugin registering a
       fleetshift.cluster-provider extension automatically appears as a
-      child of "Create Cluster" in search results.
+      child of "Clusters" in search results.
     '''
 
     include
@@ -364,7 +364,7 @@ views {
       type strings in typeToFeatureId map.
 
       Phase 2: scan all other extensions → look up type in typeToFeatureId
-      to find parent → compose route (parent basePath + to.pathname) →
+      to find parent → compose route (parent basePath + to pathname/search) →
       insert with feature field linking to parent.
 
       The extension scan is fully generic. Adding a new extension type

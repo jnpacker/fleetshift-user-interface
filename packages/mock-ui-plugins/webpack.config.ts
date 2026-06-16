@@ -66,6 +66,7 @@ const ManagementPlugin = new FleetshiftPlugin({
       id: "targets",
       label: "Targets",
       component: { $codeRef: "TargetsPage.default" },
+      icon: { $codeRef: "TargetsIcon.default" },
       description: "View and manage deployment targets",
       keywords: ["target", "deploy", "rollout"],
     }),
@@ -79,59 +80,7 @@ const ManagementPlugin = new FleetshiftPlugin({
     version: "1.0.0",
     exposedModules: {
       TargetsPage: p("./src/plugins/management-plugin/TargetsPage.tsx"),
-    },
-  },
-});
-
-const DayOnePlugin = new FleetshiftPlugin({
-  extensions: [
-    createModule({
-      id: "day-one",
-      label: "Day One",
-      component: { $codeRef: "DayOnePage.default" },
-      description: "Initial setup and onboarding",
-      keywords: ["setup", "onboarding", "welcome"],
-      extensionPoints: {
-        steps: {
-          description: "Setup steps shown as cards on the Day One page",
-          type: "fleetshift.setup",
-        },
-      },
-    }),
-    createSetup({
-      id: "auth-setup",
-      label: "Authentication",
-      description:
-        "Configure authentication provider and backing store for your management engine.",
-      path: "auth",
-      component: { $codeRef: "InitialSetupForm.default" },
-      requires: [],
-      requiresAuth: false,
-    }),
-    createSetup({
-      id: "cluster-deploy",
-      label: "Deploy Cluster",
-      description:
-        "Select a cluster provider and deploy your first managed cluster.",
-      path: "deploy",
-      component: { $codeRef: "SetupClusterDeploy.default" },
-      requires: ["signing-key-enrollment"],
-      requiresAuth: true,
-    }),
-  ],
-  sharedModules,
-  entryScriptFilename: "plugins/day-one/day-one-plugin.[contenthash].js",
-  pluginManifestFilename: "plugins/day-one/day-one-plugin-manifest.json",
-  moduleFederationSettings: mfOverride,
-  pluginMetadata: {
-    name: "day-one-plugin",
-    version: "1.0.0",
-    exposedModules: {
-      DayOnePage: p("./src/plugins/day-one-plugin/DayOnePage.tsx"),
-      InitialSetupForm: p("./src/plugins/day-one-plugin/InitialSetupForm.tsx"),
-      SetupClusterDeploy: p(
-        "./src/plugins/day-one-plugin/cluster-providers/SetupClusterDeploy.tsx",
-      ),
+      TargetsIcon: p("./src/plugins/management-plugin/TargetsIcon.tsx"),
     },
   },
 });
@@ -142,16 +91,9 @@ const CorePlugin = new FleetshiftPlugin({
       id: "clusters",
       label: "Clusters",
       component: { $codeRef: "ClustersModule.default" },
+      icon: { $codeRef: "ClustersIcon.default" },
       description: "View and manage your fleet of clusters",
-      keywords: ["cluster", "fleet", "manage"],
-    }),
-    createModule({
-      id: "create-cluster",
-      label: "Create Cluster",
-      component: { $codeRef: "CreateClusterModule.default" },
-      description: "Launch the cluster creation wizard",
-      keywords: ["cluster", "create", "deploy", "provision", "wizard"],
-      searchResult: { $codeRef: "CreateClusterSearchResult.default" },
+      keywords: ["cluster", "fleet", "manage", "create", "deploy", "provision"],
       extensionPoints: {
         providers: {
           description: "Cluster providers available in the creation wizard",
@@ -169,12 +111,7 @@ const CorePlugin = new FleetshiftPlugin({
     version: "1.0.0",
     exposedModules: {
       ClustersModule: p("./src/plugins/core-plugin/ClustersModule.tsx"),
-      CreateClusterModule: p(
-        "./src/plugins/core-plugin/CreateClusterModule.tsx",
-      ),
-      CreateClusterSearchResult: p(
-        "./src/plugins/core-plugin/CreateClusterSearchResult.tsx",
-      ),
+      ClustersIcon: p("./src/plugins/core-plugin/ClustersIcon.tsx"),
     },
   },
 });
@@ -185,6 +122,7 @@ const SigningPlugin = new FleetshiftPlugin({
       id: "signing-keys",
       label: "Signing Keys",
       component: { $codeRef: "SigningKeyEnrollment.default" },
+      icon: { $codeRef: "SigningKeysIcon.default" },
       description: "Manage signing keys for deployment verification",
       keywords: ["signing", "key", "enrollment", "cosign"],
     }),
@@ -195,7 +133,7 @@ const SigningPlugin = new FleetshiftPlugin({
         "Enroll signing keys for deployment verification and supply chain security.",
       path: "enroll",
       component: { $codeRef: "SigningKeyEnrollment.default" },
-      requires: ["auth-setup"],
+      requires: [],
       requiresAuth: true,
     }),
   ],
@@ -210,6 +148,7 @@ const SigningPlugin = new FleetshiftPlugin({
       SigningKeyEnrollment: p(
         "./src/plugins/signing-plugin/SigningKeyEnrollment.tsx",
       ),
+      SigningKeysIcon: p("./src/plugins/signing-plugin/SigningKeysIcon.tsx"),
       useSigningKey: p("./src/plugins/signing-plugin/useSigningKey.ts"),
       signingKeyApi: p("./src/plugins/signing-plugin/signingKeyApi.ts"),
     },
@@ -249,7 +188,7 @@ const GcpHcpPlugin = new FleetshiftPlugin({
         "managed",
         "hcp",
       ],
-      to: { pathname: "gcphcp" },
+      to: { search: "?create=gcphcp" },
       icon: { $codeRef: "GcpHcpProviderCard.GcpHcpIcon" },
       card: { $codeRef: "GcpHcpProviderCard.default" },
       wizard: { $codeRef: "CreateGcpHcpWizard.default" },
@@ -281,6 +220,7 @@ const OverviewPlugin = new FleetshiftPlugin({
       id: "overview",
       label: "Overview",
       component: { $codeRef: "OverviewDashboard.default" },
+      icon: { $codeRef: "OverviewIcon.default" },
       description: "Fleet overview dashboard",
       keywords: ["overview", "dashboard", "summary"],
     }),
@@ -296,6 +236,7 @@ const OverviewPlugin = new FleetshiftPlugin({
       OverviewDashboard: p(
         "./src/plugins/overview-plugin/OverviewDashboard.tsx",
       ),
+      OverviewIcon: p("./src/plugins/overview-plugin/OverviewIcon.tsx"),
     },
   },
 });
@@ -307,7 +248,7 @@ const KindPlugin = new FleetshiftPlugin({
       label: "Kind",
       description: "Create a local Kind cluster for development and testing.",
       keywords: ["kind", "local", "development", "testing"],
-      to: { pathname: "kind" },
+      to: { search: "?create=kind" },
       icon: { $codeRef: "KindProviderCard.KindIcon" },
       card: { $codeRef: "KindProviderCard.default" },
       wizard: { $codeRef: "CreateClusterWizard.default" },
@@ -331,15 +272,204 @@ const KindPlugin = new FleetshiftPlugin({
   },
 });
 
+const SettingsPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "settings",
+      label: "Navigation",
+      component: { $codeRef: "SettingsPage.default" },
+      icon: { $codeRef: "SettingsIcon.default" },
+      description: "Manage nav layout and workspace preferences",
+      keywords: ["settings", "preferences", "nav", "order", "navigation"],
+    }),
+    createModule({
+      id: "auth-settings",
+      label: "Authentication",
+      component: { $codeRef: "AuthSettingsPage.default" },
+      icon: { $codeRef: "AuthIcon.default" },
+      description:
+        "Configure authentication provider, backing store, and OIDC settings",
+      keywords: [
+        "auth",
+        "authentication",
+        "oidc",
+        "identity",
+        "keycloak",
+        "login",
+      ],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename: "plugins/settings/settings-plugin.[contenthash].js",
+  pluginManifestFilename: "plugins/settings/settings-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "settings-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      SettingsPage: p("./src/plugins/settings-plugin/SettingsPage.tsx"),
+      SettingsIcon: p("./src/plugins/settings-plugin/SettingsIcon.tsx"),
+      AuthSettingsPage: p("./src/plugins/day-one-plugin/InitialSetupForm.tsx"),
+      AuthIcon: p("./src/plugins/settings-plugin/AuthIcon.tsx"),
+    },
+  },
+});
+
+const ConfigurationPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "configuration",
+      label: "Configuration",
+      component: { $codeRef: "ConfigurationPage.default" },
+      icon: { $codeRef: "ConfigurationIcon.default" },
+      description:
+        "Deploy and manage applications across your OpenShift fleet using GitOps and Helm. Keep workloads consistent as you scale from a single cluster to many.",
+      keywords: ["configuration", "gitops", "helm", "deploy", "applications"],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename:
+    "plugins/configuration/configuration-plugin.[contenthash].js",
+  pluginManifestFilename:
+    "plugins/configuration/configuration-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "configuration-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      ConfigurationPage: p(
+        "./src/plugins/configuration-plugin/ConfigurationPage.tsx",
+      ),
+      ConfigurationIcon: p(
+        "./src/plugins/configuration-plugin/ConfigurationIcon.tsx",
+      ),
+    },
+  },
+});
+
+const VirtualizationPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "virtualization",
+      label: "Virtualization",
+      component: { $codeRef: "VirtualizationPage.default" },
+      icon: { $codeRef: "VirtualizationIcon.default" },
+      description:
+        "Run and manage virtual machines alongside containers across your fleet with live migration and snapshot support.",
+      keywords: [
+        "virtualization",
+        "vm",
+        "virtual machine",
+        "kubevirt",
+        "migration",
+      ],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename:
+    "plugins/virtualization/virtualization-plugin.[contenthash].js",
+  pluginManifestFilename:
+    "plugins/virtualization/virtualization-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "virtualization-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      VirtualizationPage: p(
+        "./src/plugins/virtualization-plugin/VirtualizationPage.tsx",
+      ),
+      VirtualizationIcon: p(
+        "./src/plugins/virtualization-plugin/VirtualizationIcon.tsx",
+      ),
+    },
+  },
+});
+
+const SecurityPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "security",
+      label: "Security",
+      component: { $codeRef: "SecurityPage.default" },
+      icon: { $codeRef: "SecurityIcon.default" },
+      description:
+        "Scan images, enforce admission policies, and monitor compliance across your fleet.",
+      keywords: [
+        "security",
+        "vulnerability",
+        "compliance",
+        "policy",
+        "admission",
+        "scan",
+      ],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename: "plugins/security/security-plugin.[contenthash].js",
+  pluginManifestFilename: "plugins/security/security-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "security-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      SecurityPage: p("./src/plugins/security-plugin/SecurityPage.tsx"),
+      SecurityIcon: p("./src/plugins/security-plugin/SecurityIcon.tsx"),
+    },
+  },
+});
+
+const ObservabilityPlugin = new FleetshiftPlugin({
+  extensions: [
+    createModule({
+      id: "observability",
+      label: "Observability",
+      component: { $codeRef: "ObservabilityPage.default" },
+      icon: { $codeRef: "ObservabilityIcon.default" },
+      description:
+        "Unified metrics, logs, and traces across your fleet from a single pane of glass.",
+      keywords: [
+        "observability",
+        "monitoring",
+        "metrics",
+        "logs",
+        "traces",
+        "alerting",
+      ],
+    }),
+  ],
+  sharedModules,
+  entryScriptFilename:
+    "plugins/observability/observability-plugin.[contenthash].js",
+  pluginManifestFilename:
+    "plugins/observability/observability-plugin-manifest.json",
+  moduleFederationSettings: mfOverride,
+  pluginMetadata: {
+    name: "observability-plugin",
+    version: "1.0.0",
+    exposedModules: {
+      ObservabilityPage: p(
+        "./src/plugins/observability-plugin/ObservabilityPage.tsx",
+      ),
+      ObservabilityIcon: p(
+        "./src/plugins/observability-plugin/ObservabilityIcon.tsx",
+      ),
+    },
+  },
+});
+
 const pluginConfigs = [
   { plugin: OverviewPlugin, key: "overview" },
   { plugin: ManagementPlugin, key: "management" },
-  { plugin: DayOnePlugin, key: "day-one" },
   { plugin: CorePlugin, key: "core" },
   { plugin: SigningPlugin, key: "signing" },
   { plugin: RoutingPlugin, key: "routing" },
   { plugin: GcpHcpPlugin, key: "gcphcp" },
   { plugin: KindPlugin, key: "kind" },
+  { plugin: ConfigurationPlugin, key: "configuration" },
+  { plugin: VirtualizationPlugin, key: "virtualization" },
+  { plugin: SecurityPlugin, key: "security" },
+  { plugin: ObservabilityPlugin, key: "observability" },
+  { plugin: SettingsPlugin, key: "settings" },
 ] as const;
 
 const configs: Configuration[] = pluginConfigs.map(({ plugin, key }) => ({

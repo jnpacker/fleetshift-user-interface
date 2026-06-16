@@ -22,6 +22,7 @@ export interface ClusterProviderCardProps {
 }
 
 export interface ClusterProviderWizardProps {
+  onClose?: () => void;
   onSetupNext?: () => void;
   onSetupSkip?: () => void;
 }

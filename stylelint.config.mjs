@@ -65,5 +65,11 @@ export default {
         "selector-class-pattern": pluginPattern("ome-kind-", "ome-kind-wizard, ome-kind-wizard__step"),
       },
     },
+    {
+      files: ["packages/mock-ui-plugins/src/plugins/settings-plugin/**/*.{scss,css}"],
+      rules: {
+        "selector-class-pattern": pluginPattern("ome-settings-", "ome-settings-nav-order, ome-settings-nav-order__item"),
+      },
+    },
   ],
 };
